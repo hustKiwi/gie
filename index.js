@@ -19,12 +19,12 @@ const titleMap = {
   'Factors of satisfaction (convenient location)?': 'fs1',
   'Factors of satisfaction (security)?': 'fs2',
   'Factors of satisfaction (rental cost)?': 'fs3',
-  'Factors of satisfaction (private space)?': 'f4',
-  'Factors of satisfaction (good facilities and furniture)?': 'f5',
-  'Factors of satisfaction (good relationship with flatmates or homestay hosts)?': 'f6',
-  'Factors of satisfaction (similar lifestyle)?': 'f7',
-  'Factors of satisfaction (accommodation is tidy)?': 'f8',
-  'Factors of satisfaction (short distance to the school)?': 'f9',
+  'Factors of satisfaction (private space)?': 'fs4',
+  'Factors of satisfaction (good facilities and furniture)?': 'fs5',
+  'Factors of satisfaction (good relationship with flatmates or homestay hosts)?': 'fs6',
+  'Factors of satisfaction (similar lifestyle)?': 'fs7',
+  'Factors of satisfaction (accommodation is tidy)?': 'fs8',
+  'Factors of satisfaction (short distance to the school)?': 'fs9',
   'Factors of dissatisfaction (inconvenient location)?': 'fd1',
   'Factors of dissatisfaction (lack of security)?': 'fd2',
   'Factors of dissatisfaction (high rental cost)?': 'fd3',
@@ -40,11 +40,12 @@ const titleMap = {
 }
 
 const items = []
+const itemNum = 1
 
 // preproccess the data
 _.slice(parse(
   kit.readFileSync('data.csv', 'utf8'), {columns: true}
-), 0, 10).forEach((item, index) => {
+), 0, itemNum).forEach((item, index) => {
   items.push({})
   _.forEach(item, (value, key) => {
     key = titleMap[key.trim()]
@@ -58,4 +59,41 @@ _.slice(parse(
   })
 })
 
-kit.log(items)
+const results = {
+  fsA1: {
+    total: 0
+  },
+  fsA2: {
+    total: 0
+  },
+}
+
+items.forEach((item) => {
+  let fsA1Total = 0
+  let fsA2Total = 0
+  let {fsA1, fsA2} = results
+
+  for (let i = 1; i <=9; i++) {
+    let factorValue = item[`fs${i}`] - 1
+
+    fsA1Total += factorValue
+    if (_.isUndefined(fsA1[`fs${i}`])) {
+      fsA1[`fs${i}`] = 0
+    }
+    fsA1[`fs${i}`] += factorValue
+
+    if (factorValue > 0) {
+      factorValue = 2 * factorValue - 1
+    }
+    fsA2Total += factorValue
+    if (_.isUndefined(fsA2[`fs${i}`])) {
+      fsA2[`fs${i}`] = 0
+    }
+    fsA2[`fs${i}`] += factorValue
+  }
+
+  fsA1.total += fsA1Total
+  fsA2.total += fsA2Total
+})
+
+console.log(results)
