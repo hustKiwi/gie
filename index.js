@@ -36,11 +36,12 @@ const titleMap = {
   'Factors of dissatisfaction (long distance to the school)?': 'fd9',
   'Have you changed your accommodation in the last 12 months?': 'changed',
   'What are the most important factors which make you change your accommodation? (multiple choice)': 'factorsOfChanged',
-  'Do you like to live with flatmates from the same or different cultural background?': 'culturalBackground',
+  'Do you like to live with flatmates from the same or different cultural background?': 'culturalBackground'
 }
 
 const items = []
-const itemNum = 1
+const itemNum = 100
+// const itemNum = 1
 
 // preproccess the data
 _.slice(parse(
@@ -59,61 +60,97 @@ _.slice(parse(
   })
 })
 
-const results = {};
+const results = {}
 
-['fsA1', 'fsA2', 'fdA1', 'fdA2'].forEach((item) => {
+;[
+  'fsA1', 'fsA2', 'fsA3', 'fsA4', 'fsA5', 'fsA6',
+  'fdA1', 'fdA2', 'fdA3', 'fdA4', 'fdA5', 'fdA6'
+].forEach((item) => {
   results[item] = {
     total: 0
   }
 })
 
-const sumfactorvalue = (result, item, options = {}) => {
+const sumfactorvalue = (result, items, options = {}) => {
   let opts = _.assign({
     key: 'fs',
     formula: (item, key) => {
       return item[key] - 1
     },
     filter: (item) => {
-      return item
+      return _.isUndefined(item)
     }
   }, options)
-  let total = 0
 
-  for (let i = 1; i <=9; i++) {
-    let key = `${opts.key}${i}`
-    let factorValue = opts.formula(item, key)
+  items.forEach((item) => {
+    if (opts.filter(item)) return
 
-    total += factorValue
-    if (_.isUndefined(result[key])) {
-      result[key] = 0
+    let total = 0
+
+    for (let i = 1; i <=9; i++) {
+      let key = `${opts.key}${i}`
+      let factorValue = opts.formula(item, key)
+
+      total += factorValue
+      if (_.isUndefined(result[key])) {
+        result[key] = 0
+      }
+      result[key] += factorValue
     }
-    result[key] += factorValue
-  }
 
-  result.total += total
+    result.total += total
+  })
 }
 
-items.forEach((item) => {
-  sumfactorvalue(results.fsA1, item)
-  sumfactorvalue(results.fdA1, item, {
-    key: 'fd'
-  })
-
-  const formulaA2 = (item, key) => {
-    let value = item[key] - 1
-    if (value > 0) {
-      value = value = 2 * value - 1
-    }
-    return value
+const formulaA2 = (item, key) => {
+  let value = item[key] - 1
+  if (value > 0) {
+    value = value = 2 * value - 1
   }
+  return value
+}
 
-  sumfactorvalue(results.fsA2, item, {
-    formula: formulaA2
+
+//
+// factors of satisfaction
+//
+sumfactorvalue(results.fsA1, items)
+sumfactorvalue(results.fsA2, items, {
+  formula: formulaA2
+})
+
+;[
+  'less than 1 month', '1 - 6 months',
+  '7 - 12 months', 'more than 12 months'
+].forEach((lengthsOption, index) => {
+  sumfactorvalue(results[`fsA${index + 3}`], items, {
+    filter: (item) => {
+      return item.length !== lengthsOption
+    }
   })
+})
 
-  sumfactorvalue(results.fdA2, item, {
+
+//
+// factors of disatisfaction
+//
+sumfactorvalue(results.fdA1, items, {
+  key: 'fd'
+})
+sumfactorvalue(results.fdA2, items, {
+  key: 'fd',
+  formula: formulaA2
+})
+
+;[
+  'less than 1 month', '1 - 6 months',
+  '7 - 12 months', 'more than 12 months'
+].forEach((lengthsOption, index) => {
+  sumfactorvalue(results[`fdA${index + 3}`], items, {
     key: 'fd',
-    formula: formulaA2
+    filter: (item) => {
+      return item.length !== lengthsOption
+    }
   })
 })
 
