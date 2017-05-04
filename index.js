@@ -36,7 +36,7 @@ const titleMap = {
   'Factors of dissatisfaction (long distance to the school)?': 'fd9',
   'Have you changed your accommodation in the last 12 months?': 'changed',
   'What are the most important factors which make you change your accommodation? (multiple choice)': 'factorsOfChanged',
-  'Do you like to live with flatmates from the same or different cultural background?': 'culturalBackground'
+  'Do you like to live with flatmates from the same or different cultural background?': 'culturalBackground',
 }
 
 const items = []
@@ -66,12 +66,20 @@ const results = {
   fsA2: {
     total: 0
   },
+  fdA1: {
+    total: 0
+  },
+  fdA2: {
+    total: 0
+  },
 }
 
 const sumfactorvalue = (result, item, options = {}) => {
   let opts = _.assign({
     key: 'fs',
-    formula: (item, key) => {}
+    formula: (item, key) => {
+      return item[key] - 1
+    }
   }, options)
   let total = 0
 
@@ -90,20 +98,26 @@ const sumfactorvalue = (result, item, options = {}) => {
 }
 
 items.forEach((item) => {
-  sumfactorvalue(results.fsA1, item, {
-    formula: (item, key) => {
-      return item[key] - 1
-    }
+  sumfactorvalue(results.fsA1, item)
+  sumfactorvalue(results.fdA1, item, {
+    key: 'fd'
   })
 
-  sumfactorvalue(results.fsA2, item, {
-    formula: (item, key) => {
-      let value = item[key] - 1
-      if (value > 0) {
-        value = value = 2 * value - 1
-      }
-      return value
+  const formulaA2 = (item, key) => {
+    let value = item[key] - 1
+    if (value > 0) {
+      value = value = 2 * value - 1
     }
+    return value
+  }
+
+  sumfactorvalue(results.fsA2, item, {
+    formula: formulaA2
+  })
+
+  sumfactorvalue(results.fdA2, item, {
+    key: 'fd',
+    formula: formulaA2
   })
 })
 
