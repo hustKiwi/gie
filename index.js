@@ -59,26 +59,22 @@ _.slice(parse(
   })
 })
 
-const results = {
-  fsA1: {
+const results = {};
+
+['fsA1', 'fsA2', 'fdA1', 'fdA2'].forEach((item) => {
+  results[item] = {
     total: 0
-  },
-  fsA2: {
-    total: 0
-  },
-  fdA1: {
-    total: 0
-  },
-  fdA2: {
-    total: 0
-  },
-}
+  }
+})
 
 const sumfactorvalue = (result, item, options = {}) => {
   let opts = _.assign({
     key: 'fs',
     formula: (item, key) => {
       return item[key] - 1
+    },
+    filter: (item) => {
+      return item
     }
   }, options)
   let total = 0
