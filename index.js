@@ -68,32 +68,43 @@ const results = {
   },
 }
 
-items.forEach((item) => {
-  let fsA1Total = 0
-  let fsA2Total = 0
-  let {fsA1, fsA2} = results
+const sumfactorvalue = (result, item, options = {}) => {
+  let opts = _.assign({
+    key: 'fs',
+    formula: (item, key) => {}
+  }, options)
+  let total = 0
 
   for (let i = 1; i <=9; i++) {
-    let factorValue = item[`fs${i}`] - 1
+    let key = `${opts.key}${i}`
+    let factorValue = opts.formula(item, key)
 
-    fsA1Total += factorValue
-    if (_.isUndefined(fsA1[`fs${i}`])) {
-      fsA1[`fs${i}`] = 0
+    total += factorValue
+    if (_.isUndefined(result[key])) {
+      result[key] = 0
     }
-    fsA1[`fs${i}`] += factorValue
-
-    if (factorValue > 0) {
-      factorValue = 2 * factorValue - 1
-    }
-    fsA2Total += factorValue
-    if (_.isUndefined(fsA2[`fs${i}`])) {
-      fsA2[`fs${i}`] = 0
-    }
-    fsA2[`fs${i}`] += factorValue
+    result[key] += factorValue
   }
 
-  fsA1.total += fsA1Total
-  fsA2.total += fsA2Total
+  result.total += total
+}
+
+items.forEach((item) => {
+  sumfactorvalue(results.fsA1, item, {
+    formula: (item, key) => {
+      return item[key] - 1
+    }
+  })
+
+  sumfactorvalue(results.fsA2, item, {
+    formula: (item, key) => {
+      let value = item[key] - 1
+      if (value > 0) {
+        value = value = 2 * value - 1
+      }
+      return value
+    }
+  })
 })
 
 console.log(results)
