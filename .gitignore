@@ -117,6 +117,3 @@ dump.rdb
 *.swp
 .happypack/
 node_modules/
-kingsport/static/
-local_config.py
-manifest.json

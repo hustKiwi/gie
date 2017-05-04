@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node_modules/babel-cli/bin/babel-node.js index.js"
+  },
   "dependencies": {
-    "csv": "^1.1.1"
+    "csv": "^1.1.1",
+    "nokit": "^0.23.26"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1"
   }
 }
