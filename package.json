@@ -4,10 +4,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node_modules/babel-cli/bin/babel-node.js index.js"
+    "start": "node_modules/babel-cli/bin/babel-node.js --presets es2015 index.js"
   },
   "dependencies": {
+    "babel-preset-es2015": "^6.24.1",
     "csv": "^1.1.1",
+    "lodash": "^4.17.4",
     "nokit": "^0.23.26"
   },
   "devDependencies": {
