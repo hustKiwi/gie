@@ -62,6 +62,31 @@ _.slice(parse(
 
 const results = {}
 
+
+//
+// satisfied
+//
+const scoreA1 = _.sumBy(items, (item) => {
+  return parseInt(item.satisfied, 10)
+})
+results.sosA1 = _.round(scoreA1 / itemNum * 2, 2)
+
+let maleNum = 0
+const scoreA2 = _.sumBy(items, (item) => {
+  if (item.gender === 'male') {
+    maleNum++
+    return parseInt(item.satisfied, 10)
+  }
+})
+results.sosA2 = _.round(scoreA2 / maleNum * 2, 2)
+
+const scoreA3 = _.sumBy(items, (item) => {
+  if (item.gender === 'female') {
+    return parseInt(item.satisfied, 10)
+  }
+})
+results.sosA3 = _.round(scoreA3 / (itemNum - maleNum) * 2, 2)
+
 ;[
   'fsA1', 'fsA2', 'fsA3', 'fsA4', 'fsA5', 'fsA6',
   'fdA1', 'fdA2', 'fdA3', 'fdA4', 'fdA5', 'fdA6'
