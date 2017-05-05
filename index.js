@@ -3,6 +3,7 @@ const kit = require('nokit')
 const parse = require('csv-parse/lib/sync')
 
 
+const results = {}
 const titleMap = {
   'Questionnaire ID': 'id',
   'Gender?': 'gender',
@@ -60,9 +61,6 @@ _.slice(parse(
   })
 })
 
-const results = {}
-
-
 //
 // satisfied
 //
@@ -87,12 +85,30 @@ const scoreA3 = _.sumBy(items, (item) => {
 })
 results.sosA3 = _.round(scoreA3 / (itemNum - maleNum) * 2, 2)
 
+//
+// ranking distribution
+//
+results.rankingDistribution = {}
+
+items.forEach((item, index) => {
+  for (let i = 1; i <= 9; i++) {
+    if (index === 0) {
+      results.rankingDistribution[`fs${i}`] = [0, 0, 0, 0]
+      results.rankingDistribution[`fd${i}`] = [0, 0, 0, 0]
+    }
+    results.rankingDistribution[`fs${i}`][item[`fs${i}`] - 1]++
+    results.rankingDistribution[`fd${i}`][item[`fd${i}`] - 1]++
+  }
+})
+console.log(results)
+
 ;[
   'fsA1', 'fsA2', 'fsA3', 'fsA4', 'fsA5', 'fsA6',
   'fdA1', 'fdA2', 'fdA3', 'fdA4', 'fdA5', 'fdA6'
 ].forEach((item) => {
   results[item] = {
-    total: 0
+    total: 0,
+    factors: {}
   }
 })
 
@@ -106,21 +122,22 @@ const sumfactorvalue = (result, items, options = {}) => {
       return _.isUndefined(item)
     }
   }, options)
+  let {factors} = result
 
   items.forEach((item) => {
     if (opts.filter(item)) return
 
     let total = 0
 
-    for (let i = 1; i <=9; i++) {
+    for (let i = 1; i <= 9; i++) {
       let key = `${opts.key}${i}`
       let factorValue = opts.formula(item, key)
 
       total += factorValue
-      if (_.isUndefined(result[key])) {
-        result[key] = 0
+      if (_.isUndefined(factors[key])) {
+        factors[key] = 0
       }
-      result[key] += factorValue
+      factors[key] += factorValue
     }
 
     result.total += total
@@ -135,7 +152,6 @@ const formulaA2 = (item, key) => {
   return value
 }
 
-
 //
 // factors of satisfaction
 //
@@ -143,7 +159,6 @@ sumfactorvalue(results.fsA1, items)
 sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
 })
-
 ;[
   'less than 1 month', '1 - 6 months',
   '7 - 12 months', 'more than 12 months'
@@ -155,7 +170,6 @@ sumfactorvalue(results.fsA2, items, {
   })
 })
 
-
 //
 // factors of disatisfaction
 //
@@ -166,7 +180,6 @@ sumfactorvalue(results.fdA2, items, {
   key: 'fd',
   formula: formulaA2
 })
-
 ;[
   'less than 1 month', '1 - 6 months',
   '7 - 12 months', 'more than 12 months'
@@ -179,4 +192,4 @@ sumfactorvalue(results.fdA2, items, {
   })
 })
 
-console.log(results)
+// console.log(results)
