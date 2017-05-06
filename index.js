@@ -15,7 +15,7 @@ const titleMap = {
   'Which kind of accommodation are you living in?': 'kind',
   'How satisfied are you with your accommodation?': 'satisfied',
   'Where did you get the information of your accommodation?': 'infor',
-  'How long do you spend on commuting to your class?': 'commuting',
+  'How long do you spend on commuting to your class?': 'distance',
   'How much do you overall pay for your accommodation per week (including water, electricity and the Internet)?': 'price',
   'Factors of satisfaction (convenient location)?': 'fs1',
   'Factors of satisfaction (security)?': 'fs2',
@@ -132,12 +132,23 @@ const priceOfSatisfiedResults = [
   'priceOfSatisfiedA4', 'priceOfSatisfiedA5'
 ]
 
-priceOfSatisfiedResults.forEach((item) => {
-  results[item] = {
-    total: 0,
-    itemNum: 0
-  }
-})
+const initSatisfiedResults = (resulItems) => {
+  resulItems.forEach((item) => {
+    results[item] = {
+      total: 0,
+      itemNum: 0
+    }
+  })
+}
+
+const calSatisfied = (resulItems) => {
+  resulItems.forEach((item) => {
+    let result = results[item]
+    result.score = _.round(result.total / result.itemNum * 2, 2)
+  })
+}
+
+initSatisfiedResults(priceOfSatisfiedResults)
 
 loopData((item, itemIndex) => {
   ;[
@@ -152,10 +163,33 @@ loopData((item, itemIndex) => {
   })
 })
 
-priceOfSatisfiedResults.forEach((item) => {
-  let result = results[item]
-  result.score = _.round(result.total / result.itemNum * 2, 2)
+calSatisfied(priceOfSatisfiedResults)
+
+
+//
+// relationship between distance and satisfaction
+//
+const distanceOfSatisfiedResults = [
+  'distanceOfSatisfiedA1', 'distanceOfSatisfiedA2',
+  'distanceOfSatisfiedA3', 'distanceOfSatisfiedA4'
+]
+
+initSatisfiedResults(distanceOfSatisfiedResults)
+
+loopData((item, itemIndex) => {
+  ;[
+    'less than 15 minutes', '15 - 30 minutes',
+    '46 - 60 minutes', 'more than 60 minutes'
+  ].forEach((distance, distanceIndex) => {
+    if (item.distance === distance) {
+      let result = results[`distanceOfSatisfiedA${distanceIndex + 1}`]
+      result.itemNum++
+      result.total += parseInt(item.satisfied, 10)
+    }
+  })
 })
+
+calSatisfied(distanceOfSatisfiedResults)
 
 console.log(results)
 
