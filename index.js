@@ -407,4 +407,5 @@ sumfactorvalue(results['fdA2-not_change'], items, {
   }
 })
 
-console.log(results)
+kit.log(results)
+kit.outputJsonSync('results.json', results)

@@ -115,5 +115,6 @@ dump.rdb
 
 # Customized
 *.swp
+results.json
 .happypack/
 node_modules/
