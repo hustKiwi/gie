@@ -20,6 +20,10 @@ const questionOptions = {
   distance: [
     'less than 15 minutes', '15 - 30 minutes',
     '46 - 60 minutes', 'more than 60 minutes'
+  ],
+  factor: [
+    'location', 'security', 'cost', 'private', 'facilities',
+    'relationship', 'lifestyle', 'cleanliness', 'distance'
   ]
 }
 
@@ -27,6 +31,7 @@ const genderOptions = questionOptions.gender
 const priceOptions = questionOptions.price
 const dateOptions = questionOptions.date
 const distanceOptions = questionOptions.distance
+const factorOptions = questionOptions.factor
 
 const titleMap = {
   'Questionnaire ID': 'id',
@@ -41,24 +46,24 @@ const titleMap = {
   'Where did you get the information of your accommodation?': 'infor',
   'How long do you spend on commuting to your class?': 'distance',
   'How much do you overall pay for your accommodation per week (including water, electricity and the Internet)?': 'price',
-  'Factors of satisfaction (convenient location)?': 'fs1',
-  'Factors of satisfaction (security)?': 'fs2',
-  'Factors of satisfaction (rental cost)?': 'fs3',
-  'Factors of satisfaction (private space)?': 'fs4',
-  'Factors of satisfaction (good facilities and furniture)?': 'fs5',
-  'Factors of satisfaction (good relationship with flatmates or homestay hosts)?': 'fs6',
-  'Factors of satisfaction (similar lifestyle)?': 'fs7',
-  'Factors of satisfaction (accommodation is tidy)?': 'fs8',
-  'Factors of satisfaction (short distance to the school)?': 'fs9',
-  'Factors of dissatisfaction (inconvenient location)?': 'fd1',
-  'Factors of dissatisfaction (lack of security)?': 'fd2',
-  'Factors of dissatisfaction (high rental cost)?': 'fd3',
-  'Factors of dissatisfaction (disturbed by others)?': 'fd4',
-  'Factors of dissatisfaction (lack of facilities or furniture)?': 'fd5',
-  'Factors of dissatisfaction (bad relationship with flatmates or homestay hosts)?': 'fd6',
-  'Factors of dissatisfaction (different lifestyle)?': 'fd7',
-  'Factors of dissatisfaction (accommodation is untidy)?': 'fd8',
-  'Factors of dissatisfaction (long distance to the school)?': 'fd9',
+  'Factors of satisfaction (convenient location)?': 'fs-location',
+  'Factors of satisfaction (security)?': 'fs-security',
+  'Factors of satisfaction (rental cost)?': 'fs-cost',
+  'Factors of satisfaction (private space)?': 'fs-private',
+  'Factors of satisfaction (good facilities and furniture)?': 'fs-facilities',
+  'Factors of satisfaction (good relationship with flatmates or homestay hosts)?': 'fs-relationship',
+  'Factors of satisfaction (similar lifestyle)?': 'fs-lifestyle',
+  'Factors of satisfaction (accommodation is tidy)?': 'fs-cleanliness',
+  'Factors of satisfaction (short distance to the school)?': 'fs-distance',
+  'Factors of dissatisfaction (inconvenient location)?': 'fd-location',
+  'Factors of dissatisfaction (lack of security)?': 'fd-security',
+  'Factors of dissatisfaction (high rental cost)?': 'fd-cost',
+  'Factors of dissatisfaction (disturbed by others)?': 'fd-private',
+  'Factors of dissatisfaction (lack of facilities or furniture)?': 'fd-facilities',
+  'Factors of dissatisfaction (bad relationship with flatmates or homestay hosts)?': 'fd-relationship',
+  'Factors of dissatisfaction (different lifestyle)?': 'fd-lifestyle',
+  'Factors of dissatisfaction (accommodation is untidy)?': 'fd-cleanliness',
+  'Factors of dissatisfaction (long distance to the school)?': 'fd-distance',
   'Have you changed your accommodation in the last 12 months?': 'changed',
   'What are the most important factors which make you change your accommodation? (multiple choice)': 'factorsOfChanged',
   'Do you like to live with flatmates from the same or different cultural background?': 'culturalBackground'
@@ -97,9 +102,9 @@ const loopData = (callback, options = {}) => {
     if (opts.filter(item, itemIndex)) return
 
     if (opts.isLoopFactors) {
-      for (let factorIndex = 1; factorIndex <= 9; factorIndex++) {
-        callback(item, itemIndex, factorIndex)
-      }
+      factorOptions.forEach((factorOption) => {
+        callback(item, itemIndex, factorOption)
+      })
     } else {
       callback(item, itemIndex)
     }
@@ -136,13 +141,15 @@ results.femaleScoreOfSatisfied = _.round(scoreA3 / (itemNum - maleNum) * 2, 2)
 // ranking distribution
 //
 results.rankingDistribution = {}
-loopData((item, itemIndex, factorIndex) => {
+loopData((item, itemIndex, factorOption) => {
+  const fsKey = `fs-${factorOption}`
+  const fdKey = `fd-${factorOption}`
   if (itemIndex === 0) {
-    results.rankingDistribution[`fs${factorIndex}`] = [0, 0, 0, 0]
-    results.rankingDistribution[`fd${factorIndex}`] = [0, 0, 0, 0]
+    results.rankingDistribution[fsKey] = [0, 0, 0, 0]
+    results.rankingDistribution[fdKey] = [0, 0, 0, 0]
   }
-  results.rankingDistribution[`fs${factorIndex}`][item[`fs${factorIndex}`] - 1]++
-  results.rankingDistribution[`fd${factorIndex}`][item[`fd${factorIndex}`] - 1]++
+  results.rankingDistribution[fsKey][item[fsKey] - 1]++
+  results.rankingDistribution[fdKey][item[fdKey] - 1]++
 }, {
   isLoopFactors: true
 })
@@ -237,16 +244,14 @@ const sumfactorvalue = (result, items, options = {}) => {
 
     let total = 0
 
-    for (let i = 1; i <= 9; i++) {
-      let key = `${opts.key}${i}`
-      let factorValue = opts.formula(item, key)
-
+    factorOptions.forEach((factorOption) => {
+      const factorValue = opts.formula(item, `${opts.key}-${factorOption}`)
       total += factorValue
-      if (_.isUndefined(factors[key])) {
-        factors[key] = 0
+      if (_.isUndefined(factors[factorOption])) {
+        factors[factorOption] = 0
       }
-      factors[key] += factorValue
-    }
+      factors[factorOption] += factorValue
+    })
 
     result.total += total
   })
