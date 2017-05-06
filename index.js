@@ -89,7 +89,7 @@ const loopData = (callback, options = {}) => {
 const scoreA1 = _.sumBy(items, (item) => {
   return parseInt(item.satisfied, 10)
 })
-results.sosA1 = _.round(scoreA1 / itemNum * 2, 2)
+results.scoreOfSatisfied = _.round(scoreA1 / itemNum * 2, 2)
 
 let maleNum = 0
 const scoreA2 = _.sumBy(items, (item) => {
@@ -98,14 +98,14 @@ const scoreA2 = _.sumBy(items, (item) => {
     return parseInt(item.satisfied, 10)
   }
 })
-results.sosA2 = _.round(scoreA2 / maleNum * 2, 2)
+results.maleScoreOfSatisfied = _.round(scoreA2 / maleNum * 2, 2)
 
 const scoreA3 = _.sumBy(items, (item) => {
   if (item.gender === 'female') {
     return parseInt(item.satisfied, 10)
   }
 })
-results.sosA3 = _.round(scoreA3 / (itemNum - maleNum) * 2, 2)
+results.femaleScoreOfSatisfied = _.round(scoreA3 / (itemNum - maleNum) * 2, 2)
 
 
 //
@@ -123,13 +123,16 @@ loopData((item, itemIndex, factorIndex) => {
   isLoopFactors: true
 })
 
+
 //
 // relationship between price and satisfaction
 //
-;[
-  'priceOfSatisfiedA1', 'priceOfSatisfiedA2',
-  'priceOfSatisfiedA3', 'priceOfSatisfiedA4'
-].forEach((item) => {
+const priceOfSatisfiedResults = [
+  'priceOfSatisfiedA1', 'priceOfSatisfiedA2', 'priceOfSatisfiedA3',
+  'priceOfSatisfiedA4', 'priceOfSatisfiedA5'
+]
+
+priceOfSatisfiedResults.forEach((item) => {
   results[item] = {
     total: 0,
     itemNum: 0
@@ -137,7 +140,25 @@ loopData((item, itemIndex, factorIndex) => {
 })
 
 loopData((item, itemIndex) => {
+  ;[
+    'below $150', '$150 - $200', '$201 - $250',
+    '$251 - $300', 'over $350'
+  ].forEach((price, priceIndex) => {
+    if (item.price === price) {
+      let result = results[`priceOfSatisfiedA${priceIndex + 1}`]
+      result.itemNum++
+      result.total += parseInt(item.satisfied, 10)
+    }
+  })
 })
+
+priceOfSatisfiedResults.forEach((item) => {
+  let result = results[item]
+  result.score = _.round(result.total / result.itemNum * 2, 2)
+})
+
+console.log(results)
+
 
 //
 // factors of satisfaction or disatisfaction
