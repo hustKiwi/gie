@@ -28,7 +28,7 @@ const titleMap = {
   'Gender?': 'gender',
   'Age?': 'age',
   'Nationality?': 'nationality',
-  'How long have you been in Auckland?': 'length',
+  'How long have you been in Auckland?': 'date',
   'What is the education level that you are / will be study for?': 'education',
   'Do you live in the city?': 'city',
   'Which kind of accommodation are you living in?': 'kind',
@@ -267,39 +267,90 @@ const formulaA2 = (item, key) => {
 }
 
 sumfactorvalue(results.fsA1, items)
+
 sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
 })
-// questionOptions.date.forEach((dateOption, index) => {
-//   sumfactorvalue(results[`fsA${index + 3}`], items, {
-//     filter: (item) => {
-//       return item.date !== dateOption
-//     }
-//   })
-// })
-// questionOptions.gender.forEach((genderOption, index) => {
-//   sumfactorvalue(results[`fdMaleA${index + 3}`], items, {
-//     filter: (item) => {
-//       return item.gender !== genderOption
-//     }
-//   })
-// })
-//
-//
+
+questionOptions.date.forEach((dateOption, index) => {
+  sumfactorvalue(results[`fsA1-${_.snakeCase(dateOption)}`], items, {
+    filter: (item) => {
+      return item.date !== dateOption
+    }
+  })
+})
+
+questionOptions.date.forEach((dateOption, index) => {
+  sumfactorvalue(results[`fsA2-${_.snakeCase(dateOption)}`], items, {
+    formula: formulaA2,
+    filter: (item) => {
+      return item.date !== dateOption
+    }
+  })
+})
+
+questionOptions.gender.forEach((genderOption, index) => {
+  sumfactorvalue(results[`fsA1-${_.snakeCase(genderOption)}`], items, {
+    filter: (item) => {
+      return item.gender !== genderOption
+    }
+  })
+})
+
+questionOptions.gender.forEach((genderOption, index) => {
+  sumfactorvalue(results[`fsA2-${_.snakeCase(genderOption)}`], items, {
+    formula: formulaA2,
+    filter: (item) => {
+      return item.gender !== genderOption
+    }
+  })
+})
+
 sumfactorvalue(results.fdA1, items, {
   key: 'fd'
 })
+
 sumfactorvalue(results.fdA2, items, {
   key: 'fd',
   formula: formulaA2
 })
-// questionOptions.length.forEach((lengthOption, index) => {
-//   sumfactorvalue(results[`fdA${index + 3}`], items, {
-//     key: 'fd',
-//     filter: (item) => {
-//       return item.length !== lengthOption
-//     }
-//   })
-// })
+
+questionOptions.date.forEach((dateOption, index) => {
+  sumfactorvalue(results[`fdA1-${_.snakeCase(dateOption)}`], items, {
+    key: 'fd',
+    filter: (item) => {
+      return item.date !== dateOption
+    }
+  })
+})
+
+questionOptions.date.forEach((dateOption, index) => {
+  sumfactorvalue(results[`fdA2-${_.snakeCase(dateOption)}`], items, {
+    key: 'fd',
+    formula: formulaA2,
+    filter: (item) => {
+      return item.date !== dateOption
+    }
+  })
+})
+
+questionOptions.gender.forEach((genderOption, index) => {
+  sumfactorvalue(results[`fdA1-${_.snakeCase(genderOption)}`], items, {
+    key: 'fd',
+    filter: (item) => {
+      return item.gender !== genderOption
+    }
+  })
+})
+
+questionOptions.gender.forEach((genderOption, index) => {
+  sumfactorvalue(results[`fdA2-${_.snakeCase(genderOption)}`], items, {
+    key: 'fd',
+    formula: formulaA2,
+    filter: (item) => {
+      return item.gender !== genderOption
+    }
+  })
+})
 
 console.log(results)
