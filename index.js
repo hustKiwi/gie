@@ -64,8 +64,8 @@ const titleMap = {
   'Factors of dissatisfaction (different lifestyle)?': 'fd-lifestyle',
   'Factors of dissatisfaction (accommodation is untidy)?': 'fd-cleanliness',
   'Factors of dissatisfaction (long distance to the school)?': 'fd-distance',
-  'Have you changed your accommodation in the last 12 months?': 'changed',
-  'What are the most important factors which make you change your accommodation? (multiple choice)': 'factorsOfChanged',
+  'Have you changed your accommodation in the last 12 months?': 'change',
+  'What are the most important factors which make you change your accommodation? (multiple choice)': 'factorsOfChange',
   'Do you like to live with flatmates from the same or different cultural background?': 'culturalBackground'
 }
 
@@ -210,20 +210,18 @@ calSatisfied('distanceOfSatisfied', distanceOptions)
 // factors of satisfaction or disatisfaction, and factors between genders
 //
 const analysisFormulas = ['fsA1', 'fdA1', 'fsA2', 'fdA2']
+const initFactors = {
+  total: 0,
+  factors: {}
+}
 
 analysisFormulas.forEach((item) => {
-  results[item] = {
-    total: 0,
-    factors: {}
-  }
+  results[item] = _.cloneDeep(initFactors)
 })
 
 ;[...dateOptions, ...genderOptions].forEach((questionOption) => {
   analysisFormulas.forEach((item) => {
-    results[`${item}-${_.snakeCase(questionOption)}`] = {
-      total: 0,
-      factors: {}
-    }
+    results[`${item}-${_.snakeCase(questionOption)}`] = _.cloneDeep(initFactors)
   })
 })
 
@@ -271,7 +269,7 @@ sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
 })
 
-dateOptions.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption) => {
   sumfactorvalue(results[`fsA1-${_.snakeCase(dateOption)}`], items, {
     filter: (item) => {
       return item.date !== dateOption
@@ -279,7 +277,7 @@ dateOptions.forEach((dateOption, index) => {
   })
 })
 
-dateOptions.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption) => {
   sumfactorvalue(results[`fsA2-${_.snakeCase(dateOption)}`], items, {
     formula: formulaA2,
     filter: (item) => {
@@ -288,7 +286,7 @@ dateOptions.forEach((dateOption, index) => {
   })
 })
 
-genderOptions.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption) => {
   sumfactorvalue(results[`fsA1-${_.snakeCase(genderOption)}`], items, {
     filter: (item) => {
       return item.gender !== genderOption
@@ -296,7 +294,7 @@ genderOptions.forEach((genderOption, index) => {
   })
 })
 
-genderOptions.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption) => {
   sumfactorvalue(results[`fsA2-${_.snakeCase(genderOption)}`], items, {
     formula: formulaA2,
     filter: (item) => {
@@ -314,7 +312,7 @@ sumfactorvalue(results.fdA2, items, {
   formula: formulaA2
 })
 
-dateOptions.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption) => {
   sumfactorvalue(results[`fdA1-${_.snakeCase(dateOption)}`], items, {
     key: 'fd',
     filter: (item) => {
@@ -323,7 +321,7 @@ dateOptions.forEach((dateOption, index) => {
   })
 })
 
-dateOptions.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption) => {
   sumfactorvalue(results[`fdA2-${_.snakeCase(dateOption)}`], items, {
     key: 'fd',
     formula: formulaA2,
@@ -333,7 +331,7 @@ dateOptions.forEach((dateOption, index) => {
   })
 })
 
-genderOptions.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption) => {
   sumfactorvalue(results[`fdA1-${_.snakeCase(genderOption)}`], items, {
     key: 'fd',
     filter: (item) => {
@@ -342,7 +340,7 @@ genderOptions.forEach((genderOption, index) => {
   })
 })
 
-genderOptions.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption) => {
   sumfactorvalue(results[`fdA2-${_.snakeCase(genderOption)}`], items, {
     key: 'fd',
     formula: formulaA2,
@@ -350,6 +348,23 @@ genderOptions.forEach((genderOption, index) => {
       return item.gender !== genderOption
     }
   })
+})
+
+
+//
+// factors of changing accommodations
+//
+;[
+  'fdA1-changed', 'fdA2-changed',
+  'fdA1-not_changed', 'fdA2-not_changed'
+].forEach((item) => {
+  results[item] = _.cloneDeep(initFactors)
+})
+
+sumfactorvalue(results['fdA1-not_changed'], items, {
+  filter: (item) => {
+    return item.changed !== 'no'
+  }
 })
 
 console.log(results)
