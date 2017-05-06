@@ -355,16 +355,26 @@ genderOptions.forEach((genderOption) => {
 // factors of changing accommodations
 //
 ;[
-  'fdA1-changed', 'fdA2-changed',
-  'fdA1-not_changed', 'fdA2-not_changed'
+  'fdA1-change', 'fdA2-change',
+  'fdA1-not_change', 'fdA2-not_change'
 ].forEach((item) => {
   results[item] = _.cloneDeep(initFactors)
 })
 
-sumfactorvalue(results['fdA1-not_changed'], items, {
+sumfactorvalue(results['fdA1-not_change'], items, {
+  key: 'fd',
   filter: (item) => {
-    return item.changed !== 'no'
+    return item.change === 'yes'
   }
 })
+
+sumfactorvalue(results['fdA1-not_change'], items, {
+  key: 'fd',
+  formula: formulaA2,
+  filter: (item) => {
+    return item.change === 'yes'
+  }
+})
+
 
 console.log(results)
