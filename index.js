@@ -385,6 +385,9 @@ items.forEach((item) => {
 
   item.factorsOfChange.forEach((factor) => {
     let key = factorMap[factor]
+    if (_.isUndefined(key)) {
+      console.log(factor, key)
+    }
     if (_.isUndefined(factors[key])) {
       factors[key] = 0
     }
