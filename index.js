@@ -4,6 +4,22 @@ const parse = require('csv-parse/lib/sync')
 
 
 const results = {}
+
+const questionOptions = {
+  price: [
+    'below $150', '$150 - $200', '$201 - $250',
+    '$251 - $300', 'over $350'
+  ],
+  length: [
+    'less than 1 month', '1 - 6 months',
+    '7 - 12 months', 'more than 12 months'
+  ],
+  distance: [
+    'less than 15 minutes', '15 - 30 minutes',
+    '46 - 60 minutes', 'more than 60 minutes'
+  ]
+}
+
 const titleMap = {
   'Questionnaire ID': 'id',
   'Gender?': 'gender',
@@ -151,10 +167,7 @@ const calSatisfied = (resulItems) => {
 initSatisfiedResults(priceOfSatisfiedResults)
 
 loopData((item, itemIndex) => {
-  ;[
-    'below $150', '$150 - $200', '$201 - $250',
-    '$251 - $300', 'over $350'
-  ].forEach((price, priceIndex) => {
+  questionOptions.price.forEach((price, priceIndex) => {
     if (item.price === price) {
       let result = results[`priceOfSatisfiedA${priceIndex + 1}`]
       result.itemNum++
@@ -177,10 +190,7 @@ const distanceOfSatisfiedResults = [
 initSatisfiedResults(distanceOfSatisfiedResults)
 
 loopData((item, itemIndex) => {
-  ;[
-    'less than 15 minutes', '15 - 30 minutes',
-    '46 - 60 minutes', 'more than 60 minutes'
-  ].forEach((distance, distanceIndex) => {
+  questionOptions.distance.forEach((distance, distanceIndex) => {
     if (item.distance === distance) {
       let result = results[`distanceOfSatisfiedA${distanceIndex + 1}`]
       result.itemNum++
@@ -190,8 +200,6 @@ loopData((item, itemIndex) => {
 })
 
 calSatisfied(distanceOfSatisfiedResults)
-
-console.log(results)
 
 
 //
@@ -251,10 +259,7 @@ sumfactorvalue(results.fsA1, items)
 sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
 })
-;[
-  'less than 1 month', '1 - 6 months',
-  '7 - 12 months', 'more than 12 months'
-].forEach((lengthsOption, index) => {
+questionOptions.length.forEach((lengthsOption, index) => {
   sumfactorvalue(results[`fsA${index + 3}`], items, {
     filter: (item) => {
       return item.length !== lengthsOption
@@ -269,10 +274,7 @@ sumfactorvalue(results.fdA2, items, {
   key: 'fd',
   formula: formulaA2
 })
-;[
-  'less than 1 month', '1 - 6 months',
-  '7 - 12 months', 'more than 12 months'
-].forEach((lengthsOption, index) => {
+questionOptions.length.forEach((lengthsOption, index) => {
   sumfactorvalue(results[`fdA${index + 3}`], items, {
     key: 'fd',
     filter: (item) => {
