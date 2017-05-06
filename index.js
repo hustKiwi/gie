@@ -16,7 +16,7 @@ const titleMap = {
   'How satisfied are you with your accommodation?': 'satisfied',
   'Where did you get the information of your accommodation?': 'infor',
   'How long do you spend on commuting to your class?': 'commuting',
-  'How much do you overall pay for your accommodation per week (including water, electricity and the Internet)?': 'payment',
+  'How much do you overall pay for your accommodation per week (including water, electricity and the Internet)?': 'price',
   'Factors of satisfaction (convenient location)?': 'fs1',
   'Factors of satisfaction (security)?': 'fs2',
   'Factors of satisfaction (rental cost)?': 'fs3',
@@ -52,14 +52,36 @@ _.slice(parse(
   _.forEach(item, (value, key) => {
     key = titleMap[key.trim()]
     if (key) {
-      items[index][key] = value.includes(';') ?
-        value.split(';').map((item) => {
+      items[index][key] = value.includes(';')
+        ? value.split(';').map((item) => {
           return item.trim()
         })
         : value.trim()
     }
   })
 })
+
+const loopData = (callback, options = {}) => {
+  let opts = _.assign({
+    isLoopFactors: false,
+    filter: (item) => {
+      return _.isUndefined(item)
+    }
+  }, options)
+
+  items.forEach((item, itemIndex) => {
+    if (opts.filter(item, itemIndex)) return
+
+    if (opts.isLoopFactors) {
+      for (let factorIndex = 1; factorIndex <= 9; factorIndex++) {
+        callback(item, itemIndex, factorIndex)
+      }
+    } else {
+      callback(item, itemIndex)
+    }
+  })
+}
+
 
 //
 // satisfied
@@ -85,23 +107,41 @@ const scoreA3 = _.sumBy(items, (item) => {
 })
 results.sosA3 = _.round(scoreA3 / (itemNum - maleNum) * 2, 2)
 
+
 //
 // ranking distribution
 //
 results.rankingDistribution = {}
+loopData((item, itemIndex, factorIndex) => {
+  if (itemIndex === 0) {
+    results.rankingDistribution[`fs${factorIndex}`] = [0, 0, 0, 0]
+    results.rankingDistribution[`fd${factorIndex}`] = [0, 0, 0, 0]
+  }
+  results.rankingDistribution[`fs${factorIndex}`][item[`fs${factorIndex}`] - 1]++
+  results.rankingDistribution[`fd${factorIndex}`][item[`fd${factorIndex}`] - 1]++
+}, {
+  isLoopFactors: true
+})
 
-items.forEach((item, index) => {
-  for (let i = 1; i <= 9; i++) {
-    if (index === 0) {
-      results.rankingDistribution[`fs${i}`] = [0, 0, 0, 0]
-      results.rankingDistribution[`fd${i}`] = [0, 0, 0, 0]
-    }
-    results.rankingDistribution[`fs${i}`][item[`fs${i}`] - 1]++
-    results.rankingDistribution[`fd${i}`][item[`fd${i}`] - 1]++
+//
+// relationship between price and satisfaction
+//
+;[
+  'priceOfSatisfiedA1', 'priceOfSatisfiedA2',
+  'priceOfSatisfiedA3', 'priceOfSatisfiedA4'
+].forEach((item) => {
+  results[item] = {
+    total: 0,
+    itemNum: 0
   }
 })
-console.log(results)
 
+loopData((item, itemIndex) => {
+})
+
+//
+// factors of satisfaction or disatisfaction
+//
 ;[
   'fsA1', 'fsA2', 'fsA3', 'fsA4', 'fsA5', 'fsA6',
   'fdA1', 'fdA2', 'fdA3', 'fdA4', 'fdA5', 'fdA6'
@@ -152,9 +192,6 @@ const formulaA2 = (item, key) => {
   return value
 }
 
-//
-// factors of satisfaction
-//
 sumfactorvalue(results.fsA1, items)
 sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
@@ -170,9 +207,6 @@ sumfactorvalue(results.fsA2, items, {
   })
 })
 
-//
-// factors of disatisfaction
-//
 sumfactorvalue(results.fdA1, items, {
   key: 'fd'
 })
