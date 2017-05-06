@@ -23,6 +23,11 @@ const questionOptions = {
   ]
 }
 
+const genderOptions = questionOptions.gender
+const priceOptions = questionOptions.price
+const dateOptions = questionOptions.date
+const distanceOptions = questionOptions.distance
+
 const titleMap = {
   'Questionnaire ID': 'id',
   'Gender?': 'gender',
@@ -146,64 +151,53 @@ loopData((item, itemIndex, factorIndex) => {
 //
 // relationship between price and satisfaction
 //
-const priceOfSatisfiedResults = [
-  'priceOfSatisfiedA1', 'priceOfSatisfiedA2', 'priceOfSatisfiedA3',
-  'priceOfSatisfiedA4', 'priceOfSatisfiedA5'
-]
-
-const initSatisfiedResults = (resulItems) => {
-  resulItems.forEach((item) => {
-    results[item] = {
+const initSatisfiedResults = (prefix, options) => {
+  options.forEach((option) => {
+    results[`${prefix}-${_.snakeCase(option)}`] = {
       total: 0,
       itemNum: 0
     }
   })
 }
 
-const calSatisfied = (resulItems) => {
-  resulItems.forEach((item) => {
-    let result = results[item]
+const calSatisfied = (prefix, options) => {
+  options.forEach((option) => {
+    let result = results[`${prefix}-${_.snakeCase(option)}`]
     result.score = _.round(result.total / result.itemNum * 2, 2)
   })
 }
 
-initSatisfiedResults(priceOfSatisfiedResults)
+initSatisfiedResults('priceOfSatisfied', priceOptions)
 
-loopData((item, itemIndex) => {
-  questionOptions.price.forEach((price, priceIndex) => {
-    if (item.price === price) {
-      let result = results[`priceOfSatisfiedA${priceIndex + 1}`]
+loopData((item) => {
+  priceOptions.forEach((priceOption) => {
+    if (item.price === priceOption) {
+      let result = results[`priceOfSatisfied-${_.snakeCase(priceOption)}`]
       result.itemNum++
       result.total += parseInt(item.satisfied, 10)
     }
   })
 })
 
-calSatisfied(priceOfSatisfiedResults)
+calSatisfied('priceOfSatisfied', priceOptions)
 
 
 //
 // relationship between distance and satisfaction
 //
-const distanceOfSatisfiedResults = [
-  'distanceOfSatisfiedA1', 'distanceOfSatisfiedA2',
-  'distanceOfSatisfiedA3', 'distanceOfSatisfiedA4'
-]
+initSatisfiedResults('distanceOfSatisfied', distanceOptions)
 
-initSatisfiedResults(distanceOfSatisfiedResults)
-
-loopData((item, itemIndex) => {
-  questionOptions.distance.forEach((distance, distanceIndex) => {
-    if (item.distance === distance) {
-      let result = results[`distanceOfSatisfiedA${distanceIndex + 1}`]
+loopData((item) => {
+  distanceOptions.forEach((distanceOption) => {
+    if (item.distance === distanceOption) {
+      let result = results[`distanceOfSatisfied-${_.snakeCase(distanceOption)}`]
       result.itemNum++
       result.total += parseInt(item.satisfied, 10)
     }
   })
 })
 
-calSatisfied(distanceOfSatisfiedResults)
-
+calSatisfied('distanceOfSatisfied', distanceOptions)
 
 //
 // factors of satisfaction or disatisfaction, and factors between genders
@@ -217,7 +211,7 @@ analysisFormulas.forEach((item) => {
   }
 })
 
-;[...questionOptions.date, ...questionOptions.gender].forEach((questionOption) => {
+;[...dateOptions, ...genderOptions].forEach((questionOption) => {
   analysisFormulas.forEach((item) => {
     results[`${item}-${_.snakeCase(questionOption)}`] = {
       total: 0,
@@ -272,7 +266,7 @@ sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
 })
 
-questionOptions.date.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption, index) => {
   sumfactorvalue(results[`fsA1-${_.snakeCase(dateOption)}`], items, {
     filter: (item) => {
       return item.date !== dateOption
@@ -280,7 +274,7 @@ questionOptions.date.forEach((dateOption, index) => {
   })
 })
 
-questionOptions.date.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption, index) => {
   sumfactorvalue(results[`fsA2-${_.snakeCase(dateOption)}`], items, {
     formula: formulaA2,
     filter: (item) => {
@@ -289,7 +283,7 @@ questionOptions.date.forEach((dateOption, index) => {
   })
 })
 
-questionOptions.gender.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption, index) => {
   sumfactorvalue(results[`fsA1-${_.snakeCase(genderOption)}`], items, {
     filter: (item) => {
       return item.gender !== genderOption
@@ -297,7 +291,7 @@ questionOptions.gender.forEach((genderOption, index) => {
   })
 })
 
-questionOptions.gender.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption, index) => {
   sumfactorvalue(results[`fsA2-${_.snakeCase(genderOption)}`], items, {
     formula: formulaA2,
     filter: (item) => {
@@ -315,7 +309,7 @@ sumfactorvalue(results.fdA2, items, {
   formula: formulaA2
 })
 
-questionOptions.date.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption, index) => {
   sumfactorvalue(results[`fdA1-${_.snakeCase(dateOption)}`], items, {
     key: 'fd',
     filter: (item) => {
@@ -324,7 +318,7 @@ questionOptions.date.forEach((dateOption, index) => {
   })
 })
 
-questionOptions.date.forEach((dateOption, index) => {
+dateOptions.forEach((dateOption, index) => {
   sumfactorvalue(results[`fdA2-${_.snakeCase(dateOption)}`], items, {
     key: 'fd',
     formula: formulaA2,
@@ -334,7 +328,7 @@ questionOptions.date.forEach((dateOption, index) => {
   })
 })
 
-questionOptions.gender.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption, index) => {
   sumfactorvalue(results[`fdA1-${_.snakeCase(genderOption)}`], items, {
     key: 'fd',
     filter: (item) => {
@@ -343,7 +337,7 @@ questionOptions.gender.forEach((genderOption, index) => {
   })
 })
 
-questionOptions.gender.forEach((genderOption, index) => {
+genderOptions.forEach((genderOption, index) => {
   sumfactorvalue(results[`fdA2-${_.snakeCase(genderOption)}`], items, {
     key: 'fd',
     formula: formulaA2,
