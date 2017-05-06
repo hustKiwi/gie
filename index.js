@@ -71,7 +71,6 @@ const titleMap = {
 
 const items = []
 const itemNum = 100
-// const itemNum = 1
 
 // preproccess the data
 _.slice(parse(
@@ -81,11 +80,15 @@ _.slice(parse(
   _.forEach(item, (value, key) => {
     key = titleMap[key.trim()]
     if (key) {
-      items[index][key] = value.includes(';')
-        ? value.split(';').map((item) => {
-          return item.trim()
-        })
-        : value.trim()
+      items[index][key] = (() => {
+        if (key === 'factorsOfChange') {
+          return value.split(';').map((item) => {
+            return item.trim()
+          })
+        } else {
+          return value.trim()
+        }
+      })()
     }
   })
 })
@@ -355,10 +358,38 @@ genderOptions.forEach((genderOption) => {
 // factors of changing accommodations
 //
 ;[
-  'fdA1-change', 'fdA2-change',
-  'fdA1-not_change', 'fdA2-not_change'
+  'fd-change', 'fdA1-not_change', 'fdA2-not_change'
 ].forEach((item) => {
   results[item] = _.cloneDeep(initFactors)
+})
+
+items.forEach((item) => {
+  if (item.change === 'no') return
+
+  const factorMap = {
+    'inconvenient location': 'location',
+    'lack of security': 'security',
+    'high rental cost': 'cost',
+    'disturbed by others': 'private',
+    'lack of facilities or furniture': 'facilities',
+    'bad relationship with flatmates or homestay hosts': 'relationship',
+    'different lifestyle': 'lifestyle',
+    'accommodation is untidy': 'cleanliness',
+    'long distance to the school': 'distance',
+    'other ___________________': 'other'
+  }
+
+  let result = results['fd-change']
+  let {factors} = result
+  result.total++
+
+  item.factorsOfChange.forEach((factor) => {
+    let key = factorMap[factor]
+    if (_.isUndefined(factors[key])) {
+      factors[key] = 0
+    }
+    factors[key]++
+  })
 })
 
 sumfactorvalue(results['fdA1-not_change'], items, {
@@ -368,13 +399,12 @@ sumfactorvalue(results['fdA1-not_change'], items, {
   }
 })
 
-sumfactorvalue(results['fdA1-not_change'], items, {
+sumfactorvalue(results['fdA2-not_change'], items, {
   key: 'fd',
   formula: formulaA2,
   filter: (item) => {
     return item.change === 'yes'
   }
 })
-
 
 console.log(results)
