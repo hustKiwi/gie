@@ -4,9 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node_modules/babel-cli/bin/babel-node.js --presets env index.js"
+    "start": "node_modules/babel-cli/bin/babel-node.js index.js"
   },
   "dependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-env": "^1.4.0",
     "csv": "^1.1.1",
     "lodash": "^4.17.4",

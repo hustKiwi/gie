@@ -6,11 +6,14 @@ const parse = require('csv-parse/lib/sync')
 const results = {}
 
 const questionOptions = {
+  gender: [
+    'male', 'female'
+  ],
   price: [
     'below $150', '$150 - $200', '$201 - $250',
     '$251 - $300', 'over $350'
   ],
-  length: [
+  date: [
     'less than 1 month', '1 - 6 months',
     '7 - 12 months', 'more than 12 months'
   ],
@@ -203,16 +206,24 @@ calSatisfied(distanceOfSatisfiedResults)
 
 
 //
-// factors of satisfaction or disatisfaction
+// factors of satisfaction or disatisfaction, and factors between genders
 //
-;[
-  'fsA1', 'fsA2', 'fsA3', 'fsA4', 'fsA5', 'fsA6',
-  'fdA1', 'fdA2', 'fdA3', 'fdA4', 'fdA5', 'fdA6'
-].forEach((item) => {
+const analysisFormulas = ['fsA1', 'fdA1', 'fsA2', 'fdA2']
+
+analysisFormulas.forEach((item) => {
   results[item] = {
     total: 0,
     factors: {}
   }
+})
+
+;[...questionOptions.date, ...questionOptions.gender].forEach((questionOption) => {
+  analysisFormulas.forEach((item) => {
+    results[`${item}-${_.snakeCase(questionOption)}`] = {
+      total: 0,
+      factors: {}
+    }
+  })
 })
 
 const sumfactorvalue = (result, items, options = {}) => {
@@ -259,14 +270,22 @@ sumfactorvalue(results.fsA1, items)
 sumfactorvalue(results.fsA2, items, {
   formula: formulaA2
 })
-questionOptions.length.forEach((lengthsOption, index) => {
-  sumfactorvalue(results[`fsA${index + 3}`], items, {
-    filter: (item) => {
-      return item.length !== lengthsOption
-    }
-  })
-})
-
+// questionOptions.date.forEach((dateOption, index) => {
+//   sumfactorvalue(results[`fsA${index + 3}`], items, {
+//     filter: (item) => {
+//       return item.date !== dateOption
+//     }
+//   })
+// })
+// questionOptions.gender.forEach((genderOption, index) => {
+//   sumfactorvalue(results[`fdMaleA${index + 3}`], items, {
+//     filter: (item) => {
+//       return item.gender !== genderOption
+//     }
+//   })
+// })
+//
+//
 sumfactorvalue(results.fdA1, items, {
   key: 'fd'
 })
@@ -274,13 +293,13 @@ sumfactorvalue(results.fdA2, items, {
   key: 'fd',
   formula: formulaA2
 })
-questionOptions.length.forEach((lengthsOption, index) => {
-  sumfactorvalue(results[`fdA${index + 3}`], items, {
-    key: 'fd',
-    filter: (item) => {
-      return item.length !== lengthsOption
-    }
-  })
-})
+// questionOptions.length.forEach((lengthOption, index) => {
+//   sumfactorvalue(results[`fdA${index + 3}`], items, {
+//     key: 'fd',
+//     filter: (item) => {
+//       return item.length !== lengthOption
+//     }
+//   })
+// })
 
-// console.log(results)
+console.log(results)
