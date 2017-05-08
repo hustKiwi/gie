@@ -11,14 +11,14 @@ const questionOptions = {
   ],
   price: [
     'below $150', '$150 - $200', '$201 - $250',
-    '$251 - $300', 'over $350'
+    '$251 - $300', '$301 - $350', 'over $350'
   ],
   date: [
     'less than 1 month', '1 - 6 months',
     '7 - 12 months', 'more than 12 months'
   ],
   distance: [
-    'less than 15 minutes', '15 - 30 minutes',
+    'less than 15 minutes', '15 - 30 minutes',  '31 - 45 minutes',
     '46 - 60 minutes', 'more than 60 minutes'
   ],
   factor: [
@@ -161,53 +161,66 @@ loopData((item, itemIndex, factorOption) => {
 //
 // relationship between price and satisfaction
 //
-const initSatisfiedResults = (prefix, options) => {
-  options.forEach((option) => {
-    results[`${prefix}-${_.snakeCase(option)}`] = {
-      total: 0,
-      itemNum: 0
-    }
+const processSatisfied = (prefix, key, filter = () => {}) => {
+  const options = questionOptions[key]
+
+  const initSatisfiedResults = (prefix, options) => {
+    options.forEach((option) => {
+      results[`${prefix}-${_.snakeCase(option)}`] = {
+        total: 0,
+        itemNum: 0
+      }
+    })
+  }
+
+  const calSatisfied = (prefix, options) => {
+    options.forEach((option) => {
+      let result = results[`${prefix}-${_.snakeCase(option)}`]
+      result.score = _.round(result.total / result.itemNum * 2, 2)
+    })
+  }
+
+  initSatisfiedResults(prefix, options)
+
+  loopData((item) => {
+    options.forEach((option) => {
+      if (filter(item)) return
+
+      if (item[key] === option) {
+        let result = results[`${prefix}-${_.snakeCase(option)}`]
+        result.itemNum++
+        result.total += parseInt(item.satisfied, 10)
+      }
+    })
   })
+
+  calSatisfied(prefix, options)
 }
 
-const calSatisfied = (prefix, options) => {
-  options.forEach((option) => {
-    let result = results[`${prefix}-${_.snakeCase(option)}`]
-    result.score = _.round(result.total / result.itemNum * 2, 2)
-  })
-}
+processSatisfied('priceOfSatisfied', 'price')
 
-initSatisfiedResults('priceOfSatisfied', priceOptions)
-
-loopData((item) => {
-  priceOptions.forEach((priceOption) => {
-    if (item.price === priceOption) {
-      let result = results[`priceOfSatisfied-${_.snakeCase(priceOption)}`]
-      result.itemNum++
-      result.total += parseInt(item.satisfied, 10)
-    }
-  })
+processSatisfied('priceOfSatisfiedMale', 'price', (item) => {
+  return item.gender !== 'male'
 })
 
-calSatisfied('priceOfSatisfied', priceOptions)
+processSatisfied('priceOfSatisfiedFemale', 'price', (item) => {
+  return item.gender !== 'female'
+})
 
 
 //
 // relationship between distance and satisfaction
 //
-initSatisfiedResults('distanceOfSatisfied', distanceOptions)
+processSatisfied('distanceOfSatisfied', 'distance')
 
-loopData((item) => {
-  distanceOptions.forEach((distanceOption) => {
-    if (item.distance === distanceOption) {
-      let result = results[`distanceOfSatisfied-${_.snakeCase(distanceOption)}`]
-      result.itemNum++
-      result.total += parseInt(item.satisfied, 10)
-    }
-  })
+processSatisfied('distanceOfSatisfiedMale', 'distance', (item) => {
+  return item.gender !== 'male'
 })
 
-calSatisfied('distanceOfSatisfied', distanceOptions)
+processSatisfied('distanceOfSatisfiedFemale', 'distance', (item) => {
+  return item.gender !== 'female'
+})
+
 
 //
 // factors of satisfaction or disatisfaction, and factors between genders
